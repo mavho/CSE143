@@ -3,7 +3,7 @@ def main():
     # stores a mapping of tokens already seen. generates count.
     mapping = {}
     for line in ngram_generator('A1-Data/1b_benchmark.train.tokens'):
-        for word in line.split(' '):
+        for word in line.split():
             if word in mapping:
                 mapping[word] += 1
             else:
