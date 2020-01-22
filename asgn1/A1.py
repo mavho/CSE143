@@ -1,11 +1,14 @@
 def main():
     # stores a mapping of tokens already seen. generates count.
     vocab = {}
+
     # unigramProb stores key as word and value as prob of word/totalWord
     unigramProb = {}
+    bigramProb = {}
+
     initialize(vocab)
-    print('count: ' + str(len(vocab)))
     getProb(vocab,unigramProb)
+    getProbBigram(unigramProb,bigramProb)
 def initialize(vocab):
     for line in ngram_generator('A1-Data/1b_benchmark.train.tokens'):
         for word in line.split():
@@ -28,16 +31,24 @@ def initialize(vocab):
 
 
 def getProb(unigram,unigramProb):
-    print("# of stops")
-    print(unigram["<STOP>"])
-    print("len of unigram")
-    print(len(unigram))
+    # return prob of 1 word / all words
+    # store the prob of each word(key) : word / total words(value)
+    runningSum = 0
+    for num in unigram:
+        runningSum += unigram[num]
+    #print(runningSum)
+    #print(unigram["<STOP>"])
     for each in unigram:
-        unigramProb[each] = unigram[each]/len(unigram)
-    
+        unigramProb[each] = unigram[each]/runningSum
+        #unigramProb[each] = unigram[each]/len(unigram)
+    print(sum(unigramProb.values()))
+def getProbBigram(bigram,brigramProb):
+    for count in range(len(bigram)):
+        if(count ==0):
+            print("j")
 
-# return prob of 1 word / all words
-# store the prob of each word(key) : word / total words(value)
+   
+
 ### Replace words that don't appear in training data.
 
 def replace_unknowns(in_file, outfile, vocab):
