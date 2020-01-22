@@ -13,7 +13,7 @@ def main():
     for key in list(vocab):
         if vocab[key] < 3:
             vocab['<unk>'] += vocab[key]
-            vocab[key] = '<unk>'
+            del vocab[key]
 
     ### prepend unks to file the name
     replace_unknowns('A1-Data/1b_benchmark.train.tokens', 'A1-Data/1b_benchmark_unks.train.tokens', vocab)
@@ -30,7 +30,7 @@ def replace_unknowns(in_file, outfile, vocab):
         for line in in_f:
             line = line.decode('utf-8')
             for token in line.split():
-                if token not in vocab or vocab[token] == '<unk>':
+                if token not in vocab:
                     count += 1
                     #replace replaces all tokens 
                     line = line.replace(token, '<unk>')
