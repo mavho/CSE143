@@ -2,9 +2,11 @@ import math
 def main():
     # stores a mapping of tokens already seen. generates count.
     vocab = {}
+    # unigramProb stores key as word and value as prob of word/totalWord
+    unigramProb = {}
     initialize(vocab)
     print('count: ' + str(len(vocab)))
-
+    getProb(vocab,unigramProb)
 def initialize(vocab):
     for line in ngram_generator('A1-Data/1b_benchmark.train.tokens'):
         for word in line.split():
@@ -35,8 +37,19 @@ def cal_perplexity(**kwargs):
     #    for line in  file_generator(file):
     #        for token in line.split():
                 ### calculate the perpleity
+def getProb(unigram,unigramProb):
+    print("# of stops")
+    print(unigram["<STOP>"])
+    print("len of unigram")
+    print(len(unigram))
+    for each in unigram:
+        unigramProb[each] = unigram[each]/len(unigram)
+    
 
+# return prob of 1 word / all words
+# store the prob of each word(key) : word / total words(value)
 ### Replace words that don't appear in training data.
+
 def replace_unknowns(in_file, outfile, vocab):
     count = 0
     with open(file = in_file, mode='rb') as in_f, open(outfile,'wb') as outfile:
@@ -59,7 +72,7 @@ def ngram_generator(file):
     ### read in byte
     with open(file=file, mode='rb')  as _f:
         for line in _f:
-            yield line.decode('utf-8')
+            yield line.decode('utf-8') + " <STOP>" # check here#
 
 if __name__ == '__main__':
     main()
