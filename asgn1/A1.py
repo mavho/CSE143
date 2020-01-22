@@ -1,6 +1,10 @@
 def main():
     # stores a mapping of tokens already seen. generates count.
     vocab = {}
+    initialize(vocab)
+    print('count: ' + str(len(vocab)))
+
+def initialize(vocab):
     for line in ngram_generator('A1-Data/1b_benchmark.train.tokens'):
         for word in line.split():
             if word in vocab:
@@ -20,7 +24,6 @@ def main():
     vocab['<unk>'] += replace_unknowns('A1-Data/1b_benchmark.dev.tokens', 'A1-Data/1b_benchmark_unks.dev.tokens',vocab)
     vocab['<unk>'] += replace_unknowns('A1-Data/1b_benchmark.test.tokens', 'A1-Data/1b_benchmark_unks.test.tokens', vocab)
 
-    print('count: ' + str(len(vocab)))
 
 
 ### Replace words that don't appear in training data.
