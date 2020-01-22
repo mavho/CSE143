@@ -1,6 +1,7 @@
 def main():
     # stores a mapping of tokens already seen. generates count.
     vocab = {}
+    bivocab = {}
     initialize(vocab)
     print('count: ' + str(len(vocab)))
 
@@ -18,6 +19,21 @@ def initialize(vocab):
         if vocab[key] < 3:
             vocab['<unk>'] += vocab[key]
             del vocab[key]
+    ###bigram vocab
+    bivocablist = []
+    for line in ngram_generator('A1-Data/1b_benchmark_unks.train.tokens'):
+        for word in line.split():
+            bivocablist.append(word)
+    bivocablist2 = bivocablist.copy()
+    bivocablist.pop(0)
+    tuplebivocablist=list(zip(bivocablist, bivocablist2))
+    bivocab = dict(tuplebivocablist)
+    print(bivocab)
+    
+    
+
+    
+
 
     ### prepend unks to file the name
     replace_unknowns('A1-Data/1b_benchmark.train.tokens', 'A1-Data/1b_benchmark_unks.train.tokens', vocab)
