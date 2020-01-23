@@ -7,11 +7,11 @@ def main():
     bigramProb = {}
     wordcount = initialize(vocab)
     cal_perplexity(vocab, wordcount)
-    #createbi(vocab,bivocab,'A1-Data/1b_benchmark_unks.train.tokens')
+    createbi(vocab,bivocab,'A1-Data/1b_benchmark_unks.train.tokens')
     print('count: ' + str(len(vocab)))
     #getBiProb(vocab,bivocab,bigramProb)
     
-    
+
 def initialize(vocab):
     word_count = 0
     for line in ngram_generator('A1-Data/1b_benchmark.train.tokens'):
@@ -35,20 +35,19 @@ def initialize(vocab):
     vocab['<unk>'] += replace_unknowns('A1-Data/1b_benchmark.test.tokens', 'A1-Data/1b_benchmark_unks.test.tokens', vocab)
     return word_count
 
-
-
 ### Given the probabilities of the n-grams
 ### calculate the perplexity of the sentence?
 def cal_perplexity(vocab, wc):
     fileset = ['A1-Data/1b_benchmark_unks.train.tokens','A1-Data/1b_benchmark_unks.dev.tokens','A1-Data/1b_benchmark_unks.test.tokens']
     unigramProb = {}
-    getProb(vocab, unigramProb, wc)
+    getUniProb(vocab, unigramProb, wc)
     ###
     ### for each n-gram in the sentence, 
     ### find the probability (given the probability dicts)
     ### of that ngram which is stored in the dictionary
     ### log and sum it up
     ###
+
     for file in fileset:
         print("fileset: " + file)
         L = 0 
@@ -67,41 +66,37 @@ def cal_perplexity(vocab, wc):
 
 #vocab is only needed to remove unks   
 def createbi(vocab, bivocab, file):
-    vocablist = []
-    length = len(vocablist)
     #creates list of words from file
-    for line in ngram_generator(file):
-        for word in line.split():
-            vocablist.append(word)
-    #to make sure all unks are caught
-    unkvocablist = list(vocab)
-    length = len(vocablist)
-    for x in range(0,length):
-        if vocablist[x] not in unkvocablist:
-            vocablist[x] = '<unk>'
-    #actualbivocab creation
-    vocablist2 = vocablist.copy()
-    vocablist.pop(0)
-    bivocablist=list(zip(vocablist2, vocablist))
-    for item in bivocablist:
-        if item in bivocab:
-            bivocab[item] += 1
-        else:
-            bivocab[item] = 1
+    for line in file_generator(file):
+        temp = "<START> " + line + " <STOP>"
+        temp = temp.split()
+        for i in range(1, len(temp)):
+            bigram = (temp[i - 1], temp[i])
+            print(bigram)
+            ### count of bigrams
+            if bigram not in bivocab:
+                bivocab[bigram] = 1
+            else:
+                bivocab[bigram] += 1
+    
 
-def getProb(unigram,unigramProb, wc):
-    print("# of stops")
-    print(unigram["<STOP>"])
-    print("len of unigram")
-    print(len(unigram))
+
+
+
+def getUniProb(unigram,unigramProb, wc):
+    runningSum = 0
+    for num in unigram:
+        runningSum += unigram[num]
     for each in unigram:
-        unigramProb[each] = unigram[each]/wc
+        unigramProb[each] = unigram[each]/runningSum
+    print(sum(unigramProb.values()))
 
 #prob(a|b) = prob(a and b)/prob(b)
 def getBiProb(unigram,bigram,bigramProb):
     for key in bigram:
         print(key)
         bigramProb[key]=bigram[key]/unigram[key[0]]
+
 
 def replace_unknowns(in_file, outfile, vocab):
     count = 0
