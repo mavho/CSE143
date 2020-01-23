@@ -2,6 +2,7 @@ import math
 def main():
     # stores a mapping of tokens already seen. generates count.
     vocab = {}
+    bivocab = {}
     # unigramProb stores key as word and value as prob of word/totalWord
     bigramProb = {}
     wordcount = initialize(vocab)
@@ -29,7 +30,7 @@ def initialize(vocab):
             del vocab[key]
 
     ### prepend unks to file the name
-    replace_unknowns('A1-Data/1b_benchmark.train.tokens', 'A1-Data/1b_benchmark_unks.train.tokens', vocab)
+    wc = replace_unknowns('A1-Data/1b_benchmark.train.tokens', 'A1-Data/1b_benchmark_unks.train.tokens', vocab)
     vocab['<unk>'] += replace_unknowns('A1-Data/1b_benchmark.dev.tokens', 'A1-Data/1b_benchmark_unks.dev.tokens', vocab)
     vocab['<unk>'] += replace_unknowns('A1-Data/1b_benchmark.test.tokens', 'A1-Data/1b_benchmark_unks.test.tokens', vocab)
     return word_count
@@ -109,9 +110,9 @@ def replace_unknowns(in_file, outfile, vocab):
             line = line.decode('utf-8')
             fline = ''
             for token in line.split():
+                count += 1
                 if token not in vocab:
                     token = '<unk>'
-                    count += 1
                     #replace replaces all tokens 
                 fline += token + ' '
             fline = fline.strip()
