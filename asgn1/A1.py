@@ -3,7 +3,10 @@ def main():
     # stores a mapping of tokens already seen. generates count.
     vocab = {}
     bivocab = {}
+<<<<<<< HEAD
 
+=======
+>>>>>>> 1792bde488d2508ca7780b2ff3a971dc15a64156
     # unigramProb stores key as word and value as prob of word/totalWord
     bigramProb = {}
 
@@ -32,7 +35,7 @@ def initialize(vocab):
             del vocab[key]
 
     ### prepend unks to file the name
-    replace_unknowns('A1-Data/1b_benchmark.train.tokens', 'A1-Data/1b_benchmark_unks.train.tokens', vocab)
+    wc = replace_unknowns('A1-Data/1b_benchmark.train.tokens', 'A1-Data/1b_benchmark_unks.train.tokens', vocab)
     vocab['<unk>'] += replace_unknowns('A1-Data/1b_benchmark.dev.tokens', 'A1-Data/1b_benchmark_unks.dev.tokens', vocab)
     vocab['<unk>'] += replace_unknowns('A1-Data/1b_benchmark.test.tokens', 'A1-Data/1b_benchmark_unks.test.tokens', vocab)
     return word_count
@@ -68,9 +71,8 @@ def cal_perplexity(vocab, wc):
 
 #vocab is only needed to remove unks   
 def createbi(vocab, bivocab, file):
-    vocablist = []
-    length = len(vocablist)
     #creates list of words from file
+<<<<<<< HEAD
     for line in ngram_generator(file):
         for word in line.split():
             vocablist.append(word)
@@ -91,6 +93,23 @@ def createbi(vocab, bivocab, file):
             bivocab[item] += 1
         else:
             bivocab[item] = 1
+=======
+    for line in file_generator(file):
+        temp = "<START> " + line + " <STOP>"
+        temp = temp.split()
+        for i in range(1, len(temp)):
+            bigram = (temp[i - 1], temp[i])
+            print(bigram)
+            ### count of bigrams
+            if bigram not in bivocab:
+                bivocab[bigram] = 1
+            else:
+                bivocab[bigram] += 1
+    
+
+
+
+>>>>>>> 1792bde488d2508ca7780b2ff3a971dc15a64156
 
 def getUniProb(unigram,unigramProb, wc):
     runningSum = 0
