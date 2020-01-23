@@ -1,1 +1,35 @@
 Use py3.X
+
+We'll convert this to a write up later.
+
+
+Design Doc:
+
+The first step is to generate the training vocab and replace the unks in all of the
+files.
+    The function initialize takes the training file and calculates the
+    word count as well as replace words with unks based on:
+        -appears less than 3 times
+        -doesnt appear in the built vocab
+
+
+Probability dictionaries
+    Unigram:
+        p(x_i) ==> (Number of times it appears in vocab) / (wc of training)
+    bigram:
+
+perplexity
+    wc = wordcount
+    Given three dictionaries associated with the n-grams that give us the probability of an ngram
+
+    M = keep track of word count of each file
+
+    Unigram:
+        Go through the files, calculate log2(sentence(sum(p(x_i))))
+            Sum up all -log probabilities of tokens in the sentence
+        sum up all the p(sentences), divide over M
+        2 ^ of result is perplexity
+
+    Bigram:
+
+    Trigram:

@@ -2,7 +2,7 @@ import math, re
 def main():
     # stores a mapping of tokens already seen. generates count.
     vocab = {}
-    # unigramProb stores key as word and value as prob of word/totalWord
+    ### Wordcount of train file
     word_count = initialize(vocab)
     cal_perplexity(vocab,word_count)
 
@@ -33,9 +33,6 @@ def initialize(vocab):
 
 def cal_perplexity(vocab, wc):
     fileset = ['A1-Data/1b_benchmark_unks.train.tokens','A1-Data/1b_benchmark_unks.dev.tokens','A1-Data/1b_benchmark_unks.test.tokens']
-
-    unigramProb = {}
-    getProb(vocab,unigramProb, wc)
     ###
     ### for each n-gram in the sentence, 
     ### find the probability (given the probability dicts)
@@ -67,7 +64,6 @@ def getProb(unigram, unigramProb, wc):
     for each in unigram:
         #unigramProb[each] = unigram[each]/len(unigram)
         unigramProb[each] = unigram[each]/wc
-    
 
 # return prob of 1 word / all words
 # store the prob of each word(key) : word / total words(value)
