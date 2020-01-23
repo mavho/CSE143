@@ -2,18 +2,15 @@ import math, re
 def main():
     # stores a mapping of tokens already seen. generates count.
     vocab = {}
-
-
     # unigramProb stores key as word and value as prob of word/totalWord
-    unigramProb = {}
-    initialize(vocab)
-    print('count: ' + str(len(vocab)))
-    getProb(vocab,unigramProb)
-    cal_perplexity(unigramProb)
+    word_count = initialize(vocab)
+    cal_perplexity(vocab,word_count)
 
 def initialize(vocab):
+    word_count = 0
     for line in ngram_generator('A1-Data/1b_benchmark.train.tokens'):
         for word in line.split():
+            word_count += 1
             if word in vocab:
                 vocab[word] += 1
             else:
@@ -31,37 +28,45 @@ def initialize(vocab):
     vocab['<unk>'] += replace_unknowns('A1-Data/1b_benchmark.dev.tokens', 'A1-Data/1b_benchmark_unks.dev.tokens', vocab)
     vocab['<unk>'] += replace_unknowns('A1-Data/1b_benchmark.test.tokens', 'A1-Data/1b_benchmark_unks.test.tokens', vocab)
 
+    return word_count
 
-### Given the probabilities of the n-grams
-### calculate the perplexity of the sentence?
-def cal_perplexity(unigramProb, **kwargs):
+
+def cal_perplexity(vocab, wc):
     fileset = ['A1-Data/1b_benchmark_unks.train.tokens','A1-Data/1b_benchmark_unks.dev.tokens','A1-Data/1b_benchmark_unks.test.tokens']
-    L = 0 
+
+    unigramProb = {}
+    getProb(vocab,unigramProb, wc)
     ###
     ### for each n-gram in the sentence, 
     ### find the probability (given the probability dicts)
     ### of that ngram which is stored in the dictionary
     ### log and sum it up
     ###
-    #for file in fileset:
-    for line in  file_generator(fileset[0]):
-        line = line.split()
-        line.insert(len(line), "<STOP>")
-        for i in range(0, len(line)):
-            #temp = (line[i-1], line[i])
-            prob = unigramProb[line[i]]
-            L += ( -1 * math.log(2, prob))
-            ### calculate the perpleity
-    print(L)
-    print(math.pow(2, L))
-    
-def getProb(unigram,unigramProb):
+    for file in fileset:
+        print("fileset: " + file)
+        L = 0 
+        word_count = 0
+        for line in  file_generator(file):
+            line = line.split()
+            line.insert(len(line), "<STOP>")
+            ### Calculate perplexity of a sentence
+            temp = 0
+            for i in range(0, len(line)):
+                word_count += 1
+                prob = unigramProb[line[i]]
+                temp += (-1 * math.log(prob, 2))
+            L += temp 
+        print(math.pow(2, L/word_count))
+
+### fill the unigramProb with probabilities based on the training set
+def getProb(unigram, unigramProb, wc):
     print("# of stops")
     print(unigram["<STOP>"])
     print("len of unigram")
     print(len(unigram))
     for each in unigram:
-        unigramProb[each] = unigram[each]/len(unigram)
+        #unigramProb[each] = unigram[each]/len(unigram)
+        unigramProb[each] = unigram[each]/wc
     
 
 # return prob of 1 word / all words
