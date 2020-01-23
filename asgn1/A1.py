@@ -11,7 +11,6 @@ def main():
     print('count: ' + str(len(vocab)))
     #getBiProb(vocab,bivocab,bigramProb)
     
-    
 
 def initialize(vocab):
     word_count = 0
@@ -36,14 +35,12 @@ def initialize(vocab):
     vocab['<unk>'] += replace_unknowns('A1-Data/1b_benchmark.test.tokens', 'A1-Data/1b_benchmark_unks.test.tokens', vocab)
     return word_count
 
-
-
 ### Given the probabilities of the n-grams
 ### calculate the perplexity of the sentence?
 def cal_perplexity(vocab, wc):
     fileset = ['A1-Data/1b_benchmark_unks.train.tokens','A1-Data/1b_benchmark_unks.dev.tokens','A1-Data/1b_benchmark_unks.test.tokens']
     unigramProb = {}
-    getProb(vocab, unigramProb, wc)
+    getUniProb(vocab, unigramProb, wc)
     ###
     ### for each n-gram in the sentence, 
     ### find the probability (given the probability dicts)
@@ -91,13 +88,13 @@ def createbi(vocab, bivocab, file):
         else:
             bivocab[item] = 1
 
-def getProb(unigram,unigramProb, wc):
-    print("# of stops")
-    print(unigram["<STOP>"])
-    print("len of unigram")
-    print(len(unigram))
+def getUniProb(unigram,unigramProb, wc):
+    runningSum = 0
+    for num in unigram:
+        runningSum += unigram[num]
     for each in unigram:
-        unigramProb[each] = unigram[each]/wc
+        unigramProb[each] = unigram[each]/runningSum
+    print(sum(unigramProb.values()))
 
 #prob(a|b) = prob(a and b)/prob(b)
 def getBiProb(unigram,bigram,bigramProb):
@@ -113,9 +110,9 @@ def replace_unknowns(in_file, outfile, vocab):
             line = line.decode('utf-8')
             fline = ''
             for token in line.split():
+                count += 1
                 if token not in vocab:
                     token = '<unk>'
-                    count += 1
                     #replace replaces all tokens 
                 fline += token + ' '
             fline = fline.strip()
