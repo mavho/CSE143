@@ -2,14 +2,16 @@ import math
 def main():
     # stores a mapping of tokens already seen. generates count.
     vocab = {}
+    bivocab = {}
 
     # unigramProb stores key as word and value as prob of word/totalWord
     bigramProb = {}
+
     wordcount = initialize(vocab)
     cal_perplexity(vocab, wordcount)
-    #createbi(vocab,bivocab,'A1-Data/1b_benchmark_unks.train.tokens')
+    createbi(vocab,bivocab,'A1-Data/1b_benchmark_unks.train.tokens')
     print('count: ' + str(len(vocab)))
-    #getBiProb(vocab,bivocab,bigramProb)
+    getBiProb(vocab,bivocab,bigramProb)
     
 
 def initialize(vocab):
@@ -73,6 +75,8 @@ def createbi(vocab, bivocab, file):
         for word in line.split():
             vocablist.append(word)
     #to make sure all unks are caught
+
+    
     unkvocablist = list(vocab)
     length = len(vocablist)
     for x in range(0,length):
@@ -101,6 +105,10 @@ def getBiProb(unigram,bigram,bigramProb):
     for key in bigram:
         print(key)
         bigramProb[key]=bigram[key]/unigram[key[0]]
+    print("bigram")
+    print(bigram)
+
+#def getTriProb()
 
 
 def replace_unknowns(in_file, outfile, vocab):
