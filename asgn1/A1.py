@@ -1,12 +1,16 @@
-import math
+import math, re
 def main():
     # stores a mapping of tokens already seen. generates count.
     vocab = {}
+
+
     # unigramProb stores key as word and value as prob of word/totalWord
     unigramProb = {}
     initialize(vocab)
     print('count: ' + str(len(vocab)))
     getProb(vocab,unigramProb)
+    cal_perplexity(unigramProb)
+
 def initialize(vocab):
     for line in ngram_generator('A1-Data/1b_benchmark.train.tokens'):
         for word in line.split():
@@ -30,13 +34,27 @@ def initialize(vocab):
 
 ### Given the probabilities of the n-grams
 ### calculate the perplexity of the sentence?
-def cal_perplexity(**kwargs):
+def cal_perplexity(unigramProb, **kwargs):
     fileset = ['A1-Data/1b_benchmark_unks.train.tokens','A1-Data/1b_benchmark_unks.dev.tokens','A1-Data/1b_benchmark_unks.test.tokens']
-    L = 23
+    L = 0 
+    ###
+    ### for each n-gram in the sentence, 
+    ### find the probability (given the probability dicts)
+    ### of that ngram which is stored in the dictionary
+    ### log and sum it up
+    ###
     #for file in fileset:
-    #    for line in  file_generator(file):
-    #        for token in line.split():
-                ### calculate the perpleity
+    for line in  file_generator(fileset[0]):
+        line = line.split()
+        line.insert(len(line), "<STOP>")
+        for i in range(0, len(line)):
+            #temp = (line[i-1], line[i])
+            prob = unigramProb[line[i]]
+            L += ( -1 * math.log(2, prob))
+            ### calculate the perpleity
+    print(L)
+    print(math.pow(2, L))
+    
 def getProb(unigram,unigramProb):
     print("# of stops")
     print(unigram["<STOP>"])
@@ -55,12 +73,14 @@ def replace_unknowns(in_file, outfile, vocab):
     with open(file = in_file, mode='rb') as in_f, open(outfile,'wb') as outfile:
         for line in in_f:
             line = line.decode('utf-8')
+            fline = ''
             for token in line.split():
                 if token not in vocab:
+                    token = '<unk>'
                     count += 1
-                    #replace replaces all tokens 
-                    line = line.replace(' ' + token + ' ', ' <unk> ', )
-            outfile.write(line.encode('utf-8'))
+                fline += token + ' '
+            fline = fline.strip()
+            outfile.write(fline.encode('utf-8') + '\n'.encode('utf-8'))
     return count
 
 def file_generator(file):
