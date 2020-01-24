@@ -3,18 +3,16 @@ def main():
     # stores a mapping of tokens already seen. generates count.
     vocab = {}
     bivocab = {}
-<<<<<<< HEAD
 
-=======
->>>>>>> 1792bde488d2508ca7780b2ff3a971dc15a64156
     # unigramProb stores key as word and value as prob of word/totalWord
     bigramProb = {}
+    unigramProb = {}
 
     wordcount = initialize(vocab)
     cal_perplexity(vocab, wordcount)
-    createbi(vocab,bivocab,'A1-Data/1b_benchmark_unks.train.tokens')
+    createbi(vocab,bivocab,bigramProb,unigramProb,'A1-Data/1b_benchmark_unks.train.tokens')
     print('count: ' + str(len(vocab)))
-    getBiProb(vocab,bivocab,bigramProb)
+    getBiProb(vocab,bivocab,bigramProb,)
     
 
 def initialize(vocab):
@@ -70,46 +68,24 @@ def cal_perplexity(vocab, wc):
         print(math.pow(2, L/word_count))
 
 #vocab is only needed to remove unks   
-def createbi(vocab, bivocab, file):
+def createbi(vocab, bivocab, bigramProb , unigram, file):
     #creates list of words from file
-<<<<<<< HEAD
-    for line in ngram_generator(file):
-        for word in line.split():
-            vocablist.append(word)
-    #to make sure all unks are caught
 
-    
-    unkvocablist = list(vocab)
-    length = len(vocablist)
-    for x in range(0,length):
-        if vocablist[x] not in unkvocablist:
-            vocablist[x] = '<unk>'
-    #actualbivocab creation
-    vocablist2 = vocablist.copy()
-    vocablist.pop(0)
-    bivocablist=list(zip(vocablist2, vocablist))
-    for item in bivocablist:
-        if item in bivocab:
-            bivocab[item] += 1
-        else:
-            bivocab[item] = 1
-=======
     for line in file_generator(file):
         temp = "<START> " + line + " <STOP>"
         temp = temp.split()
         for i in range(1, len(temp)):
             bigram = (temp[i - 1], temp[i])
-            print(bigram)
-            ### count of bigrams
             if bigram not in bivocab:
                 bivocab[bigram] = 1
             else:
                 bivocab[bigram] += 1
-    
+    for each in bivocab:
+        if ( each == "<START>"):
+            break;
+        bigramProb[each] = bivocab[each]/unigram[each[0]]
+    print(sum(bigramProb.values()))
 
-
-
->>>>>>> 1792bde488d2508ca7780b2ff3a971dc15a64156
 
 def getUniProb(unigram,unigramProb, wc):
     runningSum = 0
@@ -120,12 +96,12 @@ def getUniProb(unigram,unigramProb, wc):
     print(sum(unigramProb.values()))
 
 #prob(a|b) = prob(a and b)/prob(b)
-def getBiProb(unigram,bigram,bigramProb):
-    for key in bigram:
-        print(key)
-        bigramProb[key]=bigram[key]/unigram[key[0]]
-    print("bigram")
-    print(bigram)
+#def getBiProb(unigram,bigram,bigramProb):
+    #for key in bigram:
+        #print(key)
+        #bigramProb[key]=bigram[key]/unigram[key[0]]
+    #print("bigram")
+    #print(bigram)
 
 #def getTriProb()
 
