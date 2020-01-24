@@ -55,8 +55,8 @@ def smooth(n_gram, **kwargs):
         ### if the bigram isn't in the dict, it's prob is 0
         if bigram not in kwargs['biProb']:
             prob = (lambdas[0] * kwargs['uniProb'][unigram]) + (lambdas[1] * 0)
-            else:
-        prob = (lambdas[0] * kwargs['uniProb'][unigram]) + (lambdas[1] * kwargs['biProb'][bigram])
+        else:
+            prob = (lambdas[0] * kwargs['uniProb'][unigram]) + (lambdas[1] * kwargs['biProb'][bigram])
 
     if len(n_gram) == 3:
         unigram = n_gram[2]
