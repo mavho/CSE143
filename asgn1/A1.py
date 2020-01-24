@@ -6,14 +6,17 @@ def main():
     # unigramProb stores key as word and value as prob of word/totalWord
     bigramProb = {}
     wordcount = initialize(vocab)
-    cal_perplexity(vocab, wordcount)
+    #print(wordcount)
     createbi(vocab,bivocab,'A1-Data/1b_benchmark_unks.train.tokens')
     print('count: ' + str(len(vocab)))
     getBiProb(vocab,bivocab,bigramProb)
+
+    cal_perplexity(vocab, wordcount, bigramProb)
     
 
 def initialize(vocab):
     word_count = 0
+    ### includes the stop
     for line in ngram_generator('A1-Data/1b_benchmark.train.tokens'):
         for word in line.split():
             word_count += 1
@@ -27,17 +30,17 @@ def initialize(vocab):
     for key in list(vocab):
         if vocab[key] < 3:
             vocab['<unk>'] += vocab[key]
-            del vocab[key]
+            vocab.pop(key)
 
     ### prepend unks to file the name
     wc = replace_unknowns('A1-Data/1b_benchmark.train.tokens', 'A1-Data/1b_benchmark_unks.train.tokens', vocab)
-    vocab['<unk>'] += replace_unknowns('A1-Data/1b_benchmark.dev.tokens', 'A1-Data/1b_benchmark_unks.dev.tokens', vocab)
-    vocab['<unk>'] += replace_unknowns('A1-Data/1b_benchmark.test.tokens', 'A1-Data/1b_benchmark_unks.test.tokens', vocab)
+    replace_unknowns('A1-Data/1b_benchmark.dev.tokens', 'A1-Data/1b_benchmark_unks.dev.tokens', vocab)
+    replace_unknowns('A1-Data/1b_benchmark.test.tokens', 'A1-Data/1b_benchmark_unks.test.tokens', vocab)
     return word_count
 
 ### Given the probabilities of the n-grams
 ### calculate the perplexity of the sentence?
-def cal_perplexity(vocab, wc):
+def cal_perplexity(vocab, wc, bigramProb):
     fileset = ['A1-Data/1b_benchmark_unks.train.tokens','A1-Data/1b_benchmark_unks.dev.tokens','A1-Data/1b_benchmark_unks.test.tokens']
     unigramProb = {}
     getUniProb(vocab, unigramProb, wc)
@@ -59,9 +62,38 @@ def cal_perplexity(vocab, wc):
             for i in range(0, len(line)):
                 word_count += 1
                 prob = unigramProb[line[i]]
-                temp += (-1 * math.log(prob, 2))
-            L += temp 
+                temp += math.log(prob, 2)
+            L += temp * -1 
         print(math.pow(2, L/word_count))
+    
+    ### calculating bi grams
+    for file in fileset:
+        print("fileset: " + file)
+        L = 0 
+        word_count = 0
+        ZERO_FLAG = False
+        for line in  file_generator(file):
+            line = line.split()
+            line.insert(len(line), "<STOP>")
+            ### adds number of tokens in a sentence, exclude START
+            word_count += len(line)
+            line.insert(0, "<START>")
+            ### Calculate perplexity of a sentence
+            temp = 0
+            for i in range(1, len(line)):
+                bigram = (line[i-1], line[i])
+                if bigram in bigramProb:
+                    prob = bigramProb[bigram]
+                    temp += (-1 * math.log(prob, 2))
+                else:
+                    ZERO_FLAG = True
+            L += temp 
+        if ZERO_FLAG:
+            print('Zero Encountered: 0')
+        else:
+            print(math.pow(2, L/word_count))
+        
+    
 
 #vocab is only needed to remove unks   
 def createbi(vocab, bivocab, file):
@@ -76,22 +108,16 @@ def createbi(vocab, bivocab, file):
                 bivocab[bigram] = 1
             else:
                 bivocab[bigram] += 1
+
 #prob(a|b) = prob(b,a)/prob(b)
 def getBiProb(unigram_vocab,bigram_vocab,bigramProb):
     for key in bigram_vocab:
-        if key[0] not in unigram_vocab:
-            bigramProb[key] = 0 
-        else:
             #print(bigram_vocab[key]/unigram_vocab[key[0]])
-            bigramProb[key] = bigram_vocab[key]/unigram_vocab[key[0]]
-    print(sum(bigramProb.values()))
+            bigramProb[key] = bigram_vocab[key]/unigram_vocab[key[1]]
 
 def getUniProb(unigram,unigramProb, wc):
-    runningSum = 0
-    for num in unigram:
-        runningSum += unigram[num]
     for each in unigram:
-        unigramProb[each] = unigram[each]/runningSum
+        unigramProb[each] = unigram[each]/wc
     print(sum(unigramProb.values()))
 
 def replace_unknowns(in_file, outfile, vocab):
@@ -105,7 +131,10 @@ def replace_unknowns(in_file, outfile, vocab):
                 if token not in vocab:
                     token = '<unk>'
                     #replace replaces all tokens 
-                fline += token + ' '
+                fline += ' ' + token + ' '
+            
+            ### count stop
+            count += 1
             fline = fline.strip()
             outfile.write(fline.encode('utf-8') + '\n'.encode('utf-8'))
     return count
