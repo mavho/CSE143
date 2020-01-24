@@ -1,4 +1,5 @@
 import math
+import smoothing as SM
 def main():
     # stores a mapping of tokens already seen. generates count.
     vocab = {}
@@ -54,7 +55,7 @@ def cal_perplexity(vocab, wc, bigramProb):
         print("fileset: " + file)
         L = 0 
         word_count = 0
-        for line in  file_generator(file):
+        for line in  SM.file_generator(file):
             line = line.split()
             line.insert(len(line), "<STOP>")
             ### Calculate perplexity of a sentence
@@ -62,8 +63,8 @@ def cal_perplexity(vocab, wc, bigramProb):
             for i in range(0, len(line)):
                 word_count += 1
                 prob = unigramProb[line[i]]
-                temp += math.log(prob, 2)
-            L += temp * -1 
+                temp += (-1 * math.log(prob, 2))
+            L += temp
         print(math.pow(2, L/word_count))
     
     ### calculating bi grams
@@ -72,7 +73,7 @@ def cal_perplexity(vocab, wc, bigramProb):
         L = 0 
         word_count = 0
         ZERO_FLAG = False
-        for line in  file_generator(file):
+        for line in  SM.file_generator(file):
             line = line.split()
             line.insert(len(line), "<STOP>")
             ### adds number of tokens in a sentence, exclude START
@@ -87,18 +88,17 @@ def cal_perplexity(vocab, wc, bigramProb):
                     temp += (-1 * math.log(prob, 2))
                 else:
                     ZERO_FLAG = True
+                    break
             L += temp 
         if ZERO_FLAG:
             print('Zero Encountered: 0')
         else:
             print(math.pow(2, L/word_count))
         
-    
-
 #vocab is only needed to remove unks   
 def createbi(vocab, bivocab, file):
     #creates list of words from file
-    for line in file_generator(file):
+    for line in SM.file_generator(file):
         temp = "<START> " + line + " <STOP>"
         temp = temp.split()
         for i in range(1, len(temp)):
@@ -139,10 +139,6 @@ def replace_unknowns(in_file, outfile, vocab):
             outfile.write(fline.encode('utf-8') + '\n'.encode('utf-8'))
     return count
 
-def file_generator(file):
-    with open(file = file, mode = 'rb') as _f:
-        for line in _f:
-            yield line.decode('utf-8')
 
 def ngram_generator(file):
     ### read in byte
