@@ -5,10 +5,12 @@ def main():
     vocab = {}
     bivocab = {}
     trivocab = {}
+    SM.smoothing(names = 'hello', bigram = vocab)
     # unigramProb stores key as word and value as prob of word/totalWord
     bigramProb = {}
     trigramProb = {}
     wordcount = initialize(vocab)
+
     
     createbi(vocab,bivocab,'A1-Data/1b_benchmark_unks.train.tokens')
     print('count: ' + str(len(vocab)))
@@ -96,7 +98,7 @@ def cal_perplexity(vocab, wc, bigramProb, trigramProb):
                     break
             L += temp 
         if ZERO_FLAG:
-            print('Zero Encountered: 0')
+            print('Zero Encountered: INFIN')
         else:
             print(math.pow(2, L/word_count))
         
@@ -123,7 +125,7 @@ def cal_perplexity(vocab, wc, bigramProb, trigramProb):
                     break
             L += temp 
         if ZERO_FLAG:
-            print('Zero Encountered: 0')
+            print('Zero Encountered: INFIN')
         else:
             print(math.pow(2, L/word_count))
 #vocab is only needed to remove unks   
