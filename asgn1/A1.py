@@ -5,13 +5,13 @@ def main():
     vocab = {}
     bivocab = {}
     trivocab = {}
-    SM.smoothing(names = 'hello', bigram = vocab)
     # unigramProb stores key as word and value as prob of word/totalWord
     bigramProb = {}
     trigramProb = {}
+    unigramProb = {}
     wordcount = initialize(vocab)
+    getUniProb(vocab, unigramProb, wordcount)
 
-    
     createbi(vocab,bivocab,'A1-Data/1b_benchmark_unks.train.tokens')
     print('count: ' + str(len(vocab)))
     getBiProb(vocab,bivocab,bigramProb)
@@ -19,7 +19,9 @@ def main():
     createtri(bivocab,trivocab,'A1-Data/1b_benchmark_unks.train.tokens')
     getTriProb(bivocab,trivocab,trigramProb)
 
-    cal_perplexity(vocab, wordcount, bigramProb,trigramProb)
+    cal_perplexity(vocab, wordcount,unigramProb, bigramProb, trigramProb)
+
+    SM.smoothing(unigramProb = unigramProb, bigramProb = bigramProb, trigramProb = trigramProb, l1 = 0.2, l2 = 0.3, l4 =0.5)
     
 
 def initialize(vocab):
@@ -48,10 +50,8 @@ def initialize(vocab):
 
 ### Given the probabilities of the n-grams
 ### calculate the perplexity of the sentence?
-def cal_perplexity(vocab, wc, bigramProb, trigramProb):
+def cal_perplexity(vocab, wc,unigramProb, bigramProb, trigramProb):
     fileset = ['A1-Data/1b_benchmark_unks.train.tokens','A1-Data/1b_benchmark_unks.dev.tokens','A1-Data/1b_benchmark_unks.test.tokens']
-    unigramProb = {}
-    getUniProb(vocab, unigramProb, wc)
     ###
     ### for each n-gram in the sentence, 
     ### find the probability (given the probability dicts)
