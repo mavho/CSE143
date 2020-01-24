@@ -31,5 +31,10 @@ perplexity
         2 ^ of result is perplexity
 
     Bigram:
-
+        Basically the same as unigram...
     Trigram:
+        Same?
+
+Smoothing
+
+
