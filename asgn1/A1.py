@@ -12,9 +12,7 @@ def main():
     cal_perplexity(vocab, wordcount)
     createbi(vocab,bivocab,bigramProb,unigramProb,'A1-Data/1b_benchmark_unks.train.tokens')
     print('count: ' + str(len(vocab)))
-    getBiProb(vocab,bivocab,bigramProb,)
-    
-
+    getBiProb(vocab,bivocab,bigramProb)
 def initialize(vocab):
     word_count = 0
     for line in ngram_generator('A1-Data/1b_benchmark.train.tokens'):
@@ -50,7 +48,6 @@ def cal_perplexity(vocab, wc):
     ### of that ngram which is stored in the dictionary
     ### log and sum it up
     ###
-
     for file in fileset:
         print("fileset: " + file)
         L = 0 
@@ -76,14 +73,27 @@ def createbi(vocab, bivocab, bigramProb , unigram, file):
         temp = temp.split()
         for i in range(1, len(temp)):
             bigram = (temp[i - 1], temp[i])
+
             if bigram not in bivocab:
                 bivocab[bigram] = 1
             else:
                 bivocab[bigram] += 1
+
     for each in bivocab:
         if ( each == "<START>"):
             break;
         bigramProb[each] = bivocab[each]/unigram[each[0]]
+    print(sum(bigramProb.values()))
+
+
+#prob(a|b) = prob(b,a)/prob(b)
+def getBiProb(unigram_vocab,bigram_vocab,bigramProb):
+    for key in bigram_vocab:
+        if key[0] not in unigram_vocab:
+            bigramProb[key] = 0 
+        else:
+            #print(bigram_vocab[key]/unigram_vocab[key[0]])
+            bigramProb[key] = bigram_vocab[key]/unigram_vocab[key[0]]
     print(sum(bigramProb.values()))
 
 
@@ -95,6 +105,7 @@ def getUniProb(unigram,unigramProb, wc):
         unigramProb[each] = unigram[each]/runningSum
     print(sum(unigramProb.values()))
 
+
 #prob(a|b) = prob(a and b)/prob(b)
 #def getBiProb(unigram,bigram,bigramProb):
     #for key in bigram:
@@ -104,6 +115,7 @@ def getUniProb(unigram,unigramProb, wc):
     #print(bigram)
 
 #def getTriProb()
+
 
 
 def replace_unknowns(in_file, outfile, vocab):
