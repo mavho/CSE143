@@ -4,13 +4,18 @@ def main():
     # stores a mapping of tokens already seen. generates count.
     vocab = {}
     bivocab = {}
+    trivocab = {}
     # unigramProb stores key as word and value as prob of word/totalWord
     bigramProb = {}
+    trigramProb = {}
     wordcount = initialize(vocab)
-    #print(wordcount)
+    
     createbi(vocab,bivocab,'A1-Data/1b_benchmark_unks.train.tokens')
     print('count: ' + str(len(vocab)))
     getBiProb(vocab,bivocab,bigramProb)
+
+    createtri(bivocab,trivocab,'A1-Data/1b_benchmark_unks.train.tokens')
+    getTriProb(bivocab,trivocab,trigramProb)
 
     cal_perplexity(vocab, wordcount, bigramProb)
     
@@ -109,16 +114,40 @@ def createbi(vocab, bivocab, file):
             else:
                 bivocab[bigram] += 1
 
+def createtri(bivocab,trivocab,file):
+    for line in file_generator(file):
+        temp = "<START> " + line + " <STOP>"
+        temp = temp.split()
+        for i in range(2, len(temp)):
+            trigram = (temp[i - 2] , temp [ i-1] , temp[i])
+            if trigram not in trivocab:
+                trivocab[trigram] = 1
+            else:
+                trivocab[trigram] +=1
+
+
 #prob(a|b) = prob(b,a)/prob(b)
-def getBiProb(unigram_vocab,bigram_vocab,bigramProb):
-    for key in bigram_vocab:
-            #print(bigram_vocab[key]/unigram_vocab[key[0]])
-            bigramProb[key] = bigram_vocab[key]/unigram_vocab[key[1]]
 
 def getUniProb(unigram,unigramProb, wc):
     for each in unigram:
         unigramProb[each] = unigram[each]/wc
+    print("unigram sum")
     print(sum(unigramProb.values()))
+
+def getBiProb(unigram_vocab,bigram_vocab,bigramProb):
+    for key in bigram_vocab:
+            #print(bigram_vocab[key]/unigram_vocab[key[0]])
+            bigramProb[key] = bigram_vocab[key]/unigram_vocab[key[1]]
+    print("bigram sum")
+    print(sum(bigramProb.values()))
+
+def getTriProb(bigram_vocab,trivocab,trigramProb):
+    for key in trivocab:
+        trigramProb[key] = trivocab[key]/bigram_vocab[key[:2]]
+    print("trigram sum")
+    print(sum(trigramProb.values()))
+
+
 
 def replace_unknowns(in_file, outfile, vocab):
     count = 0
