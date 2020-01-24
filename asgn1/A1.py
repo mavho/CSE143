@@ -17,7 +17,7 @@ def main():
     createtri(bivocab,trivocab,'A1-Data/1b_benchmark_unks.train.tokens')
     getTriProb(bivocab,trivocab,trigramProb)
 
-    cal_perplexity(vocab, wordcount, bigramProb)
+    cal_perplexity(vocab, wordcount, bigramProb,trigramProb)
     
 
 def initialize(vocab):
@@ -46,7 +46,7 @@ def initialize(vocab):
 
 ### Given the probabilities of the n-grams
 ### calculate the perplexity of the sentence?
-def cal_perplexity(vocab, wc, bigramProb):
+def cal_perplexity(vocab, wc, bigramProb, trigramProb):
     fileset = ['A1-Data/1b_benchmark_unks.train.tokens','A1-Data/1b_benchmark_unks.dev.tokens','A1-Data/1b_benchmark_unks.test.tokens']
     unigramProb = {}
     getUniProb(vocab, unigramProb, wc)
@@ -100,6 +100,32 @@ def cal_perplexity(vocab, wc, bigramProb):
         else:
             print(math.pow(2, L/word_count))
         
+    for file in fileset:
+        print("fileset: " + file)
+        L = 0 
+        word_count = 0
+        ZERO_FLAG = False
+        for line in  SM.file_generator(file):
+            line = line.split()
+            line.insert(len(line), "<STOP>")
+            ### adds number of tokens in a sentence, exclude START
+            word_count += len(line)
+            line.insert(0, "<START>")
+            ### Calculate perplexity of a sentence
+            temp = 0
+            for i in range(2, len(line)):
+                trigram = (line[i-2], line[i-1], line[i])
+                if trigram in trigramProb:
+                    prob = trigramProb[trigram]
+                    temp += (-1 * math.log(prob, 2))
+                else:
+                    ZERO_FLAG = True
+                    break
+            L += temp 
+        if ZERO_FLAG:
+            print('Zero Encountered: 0')
+        else:
+            print(math.pow(2, L/word_count))
 #vocab is only needed to remove unks   
 def createbi(vocab, bivocab, file):
     #creates list of words from file
@@ -115,7 +141,7 @@ def createbi(vocab, bivocab, file):
                 bivocab[bigram] += 1
 
 def createtri(bivocab,trivocab,file):
-    for line in file_generator(file):
+    for line in SM.file_generator(file):
         temp = "<START> " + line + " <STOP>"
         temp = temp.split()
         for i in range(2, len(temp)):
