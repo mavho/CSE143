@@ -2,11 +2,13 @@ import math
 ### Calculates perplexity, and smooths out the probabilities
 def smoothing(**kwargs):
     print("Smoothing function")
-    fileset = ['A1-Data/1b_benchmark_unks.train.tokens','A1-Data/1b_benchmark_unks.dev.tokens','A1-Data/1b_benchmark_unks.test.tokens']
+    fileset = ['A1-Data/1b_benchmark_unks.train.tokens','A1-Data/1b_benchmark_unks.dev.tokens']
+    # use after determining which parameters
+    #fileset = ['A1-Data/1b_benchmark_unks.test.tokens']
     lambdas = (kwargs['l1'], kwargs['l2'], kwargs['l3'])
     ### calculating bi grams
     for file in fileset:
-        print("Bigrams fileset: " + file)
+        print("Bigrams fileset: smooth " + file)
         L = 0
         word_count = 0
         for line in  file_generator(file):
@@ -22,11 +24,12 @@ def smoothing(**kwargs):
                 prob = smooth(bigram, uniProb = kwargs['unigramProb'], biProb = kwargs['bigramProb'], lambdas = lambdas)
                 temp += (-1 * math.log(prob, 2))
             L += temp
+
         print(math.pow(2, L/word_count))
 
     ### calculating tri grams
     for file in fileset:
-        print("Trigrams fileset: " + file)
+        print("Trigrams fileset: smooth " + file)
         L = 0
         word_count = 0
         for line in  file_generator(file):
