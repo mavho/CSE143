@@ -2,9 +2,9 @@ import math
 ### Calculates perplexity, and smooths out the probabilities
 def smoothing(**kwargs):
     print("Smoothing function")
-    fileset = ['A1-Data/1b_benchmark_unks.train.tokens','A1-Data/1b_benchmark_unks.dev.tokens']
+    fileset = ['A1-Data/1b_benchmark_unks.train.tokens','A1-Data/1b_benchmark_unks.dev.tokens','A1-Data/1b_benchmark_unks.test.tokens']
     # use after determining which parameters
-    #fileset = ['A1-Data/1b_benchmark_unks.test.tokens']
+    #fileset = []
     lambdas = (kwargs['l1'], kwargs['l2'], kwargs['l3'])
     ### calculating bi grams
     for file in fileset:

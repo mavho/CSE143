@@ -1,26 +1,44 @@
-Use py3.X
+Using py3.X
 
-We'll convert this to a write up later.
+How to run: python3 A1.py
+
+Desc:
+The program builds the vocab of unigrams, bigrams, and trigrams from the training set.
+Calculates the probabilities of the n-grams, then calculates the perplexities of each file
+using these probabilities. We then use linear interpolation to smooth out these perplexities/probabilities.
+
+Output Desc:
+The program will output the name of the file it's working on along with the n-gram its using, and the perplexity of that file.
+After processing all the n-gram options, we use linear interpolation and calculate the perplexity
+of the files again.
+
+Tuning Parameters:
+To edit parameters you'll have to go into the A1.py file.
+
+If you only wanted to check the smoothing function, you can comment out line 24: cal_perplexity function.
+To change the lambdas, change l1,l2,l3 of the smoothing function to whatever values you want.
+
+If you wanted to change the threshold for word count that contribute to <UNK> change the value on line 44.
+
+File desc:
+A1.py: main file that runs as described above.
+smoothing.py: a module that provides the smoothing function A1.py uses.
+
+
+
 
 
 Design Doc:
-
 The first step is to generate the training vocab and replace the unks in all of the
 files.
     The function initialize takes the training file and calculates the
     word count as well as replace words with unks based on:
         -appears less than 3 times
         -doesnt appear in the built vocab
-
-
 Probability dictionaries
     Unigram:
         p(x_i) ==> (Number of times it appears in vocab) / (wc of training)
-    bigram:
-        prob of x_(i-1) * x_i / prob of  x_(i-1)
-    trigram :
-        prob of [x_(i−2)* x_(1−1)* x_1] / [x_(i−2)* x_(1−1)] 
-
+    
 perplexity
     wc = wordcount
     Given three dictionaries associated with the n-grams that give us the probability of an ngram
@@ -39,5 +57,4 @@ perplexity
         Same?
 
 Smoothing
-
-
+    use probability dictionaries, choose three lambdas. Add them up respectively.

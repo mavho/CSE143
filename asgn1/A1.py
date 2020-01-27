@@ -23,10 +23,7 @@ def main():
 
     cal_perplexity(vocab, wordcount,unigramProb, bigramProb, trigramProb)
 
-    print("testing smoothing with .05 .2 .75")
     SM.smoothing(unigramProb = unigramProb, bigramProb = bigramProb, trigramProb = trigramProb, l1 = 0.05, l2 = 0.2, l3 =0.75)
-    print("testing smoothing with .1 .55 .35")
-    SM.smoothing(unigramProb = unigramProb, bigramProb = bigramProb, trigramProb = trigramProb, l1 = 0.1, l2 = 0.55, l3 =0.35)
     
 
 ### initializes the starting vocab. Replaces words under 3 with unk. Replace in all files
@@ -62,7 +59,7 @@ def cal_perplexity(vocab, wc,unigramProb, bigramProb, trigramProb):
     fileset = ['A1-Data/1b_benchmark_unks.train.tokens','A1-Data/1b_benchmark_unks.dev.tokens','A1-Data/1b_benchmark_unks.test.tokens']
     ### perplexity of unigrams
     for file in fileset:
-        print("fileset: " + file)
+        print("Unigram fileset: " + file)
         L = 0 
         word_count = 0
         for line in  SM.file_generator(file):
@@ -77,7 +74,7 @@ def cal_perplexity(vocab, wc,unigramProb, bigramProb, trigramProb):
         print(math.pow(2, L/word_count))
     ### calculating bi grams
     for file in fileset:
-        print("fileset: " + file)
+        print("Bigram fileset: " + file)
         L = 0 
         word_count = 0
         ZERO_FLAG = False
@@ -106,7 +103,7 @@ def cal_perplexity(vocab, wc,unigramProb, bigramProb, trigramProb):
             print(math.pow(2, L/word_count))
         
     for file in fileset:
-        print("fileset: " + file)
+        print("Trigram fileset: " + file)
         L = 0 
         word_count = 0
         ZERO_FLAG = False
