@@ -15,12 +15,12 @@ import sys
 print(os.listdir('/content/gdrive/My Drive/CSE-143-A3'))
 sys.path.append('/content/gdrive/My Drive/CSE-143-A3')
 
-import random
-from conlleval import evaluate as conllevaluate
-
 directory = '/content/gdrive/My Drive/CSE-143-A3'
 """
 ### Unquote top line when running on colab.
+
+import random
+from conlleval import evaluate as conllevaluate
 
 def decode(input_length, tagset, score):
     """
