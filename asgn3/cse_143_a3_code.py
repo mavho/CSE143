@@ -7,7 +7,7 @@ Original file is located at
     https://colab.research.google.com/drive/1r4RY4WuXJKrwH9Ju0hQeV2brXq_Nzvpt
 """
 ### Unquote bottom line when running on colab.
-"
+"""
 from google.colab import drive
 drive.mount('/content/gdrive/')
 import os
@@ -19,7 +19,7 @@ import random
 from conlleval import evaluate as conllevaluate
 
 directory = '/content/gdrive/My Drive/CSE-143-A3'
-"
+"""
 ### Unquote top line when running on colab.
 
 def decode(input_length, tagset, score):
