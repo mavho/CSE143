@@ -31,6 +31,13 @@ def decode(input_length, tagset, score):
         <START> and i=1 points to the first token. i=input_length-1 points to <STOP>
     :return: Array strings of length input_length, which is the highest scoring tag sequence including <START> and <STOP>
     """
+    ### go through the input sentence
+    for i in range(1,input_length):
+        ### go through the pairs of tags
+        for tag in range(len(tagset)):
+            print("Current tag pair %s, %s",(tagset[tag],tagset[tag-1]))
+            print(i,score(tagset[tag],tagset[tag-1],i))
+
     # Look at the function compute_score for an example of how the tag sequence should be scored
     return
 
@@ -135,7 +142,6 @@ def train(data, feature_names, tagset, epochs):
 
 def predict(inputs, input_len, parameters, feature_names, tagset):
     """
-    
     :param inputs:
     :param input_len:
     :param parameters:
@@ -144,7 +150,6 @@ def predict(inputs, input_len, parameters, feature_names, tagset):
     :return:
     """
     features = Features(inputs, feature_names)
-
     def score(cur_tag, pre_tag, i):
         return parameters.dot_product(features.compute_features(cur_tag, pre_tag, i))
 
@@ -221,7 +226,10 @@ def evaluate(data, parameters, feature_names, tagset):
     """
     all_gold_tags = [ ]
     all_predicted_tags = [ ]
+    count = 0
     for inputs in data:
+        count += 1
+        print(count)
         all_gold_tags.extend(inputs['gold_tags'][1:-1])  # deletes <START> and <STOP>
         input_len = len(inputs['tokens'])
         all_predicted_tags.extend(predict(inputs, input_len, parameters, feature_names, tagset)[1:-1]) # deletes <START> and <STOP>
@@ -296,6 +304,8 @@ class Features(object):
         :param i: Int. The position
         :return: FeatureVector
         """
+        ### self.inputs['tokens'][i] is the current word
+        #print("Current word %s",(self.inputs['tokens'][i]))
         feats = FeatureVector({})
         if 'tag' in self.feature_names:
             feats.times_plus_equal(1, FeatureVector({'t='+cur_tag: 1}))
