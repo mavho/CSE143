@@ -31,15 +31,70 @@ def decode(input_length, tagset, score):
         <START> and i=1 points to the first token. i=input_length-1 points to <STOP>
     :return: Array strings of length input_length, which is the highest scoring tag sequence including <START> and <STOP>
     """
-    ### go through the input sentence
-    for i in range(1,input_length):
+    ### insert start tag  
+    #tagset.insert(0, "<START>")
+    #tagset.append("<STOP>")
+    tagset_len = len(tagset)
+    SA = [[0]*input_length for i in range(tagset_len)]
+    BP = [[0]*input_length for i in range(tagset_len)]
+    #print(tagset)
+    """
+    SA stores the scores
+    each column represents a token in the input
+    each row represents a tag
+
+        x0 x1 x2 x3 x4.... xn
+    t0
+    t1
+    t2
+    t3
+    .
+    ty
+    """
+    ### Base case 
+    for i in range(tagset_len):
+        #print(score(tagset[i],'<START>',1))
+        SA[i][0] = score(tagset[i],"<START>", 1)
+
+
+    ### SA[i][tag] = max of (score(blah blah blah) + previous SA[i][tag-1])
+    for i in range(1,input_length-1):
         ### go through the pairs of tags
         for tag in range(len(tagset)):
-            print("Current tag pair %s, %s",(tagset[tag],tagset[tag-1]))
-            print(i,score(tagset[tag],tagset[tag-1],i))
+            max_score = -99999
+            max_tag = ''
+            #print("%d Current tag pair %s, %s" % (i,tagset[tag],tagset[tag-1]))
+            for pair in range(len(tagset)):
+                local_score = SA[pair][i-1] + score(tagset[tag],tagset[pair],i)
+                if(local_score > max_score):
+                    max_score = local_score
+                    max_tag = pair
+                BP[tag][i] = max_tag
+            SA[tag][i] = max_score
+
+    ### last row of input
+    M = input_length - 1 
+    max_score = -999 
+    max_tag = -1 
+    for i in range(tagset_len):
+        end_score = score('<STOP>', tagset[i], input_length - 1) + SA[i][M-1]
+        if end_score > max_score:
+            max_score = end_score
+            max_tag = i 
+        BP[i][M] = max_tag
+        SA[i][M] = max_score
+
+    res = [0] * (M + 1)
+    res[len(res)-1] = max_tag
+    for m in reversed(range(M-1)):
+        res[m] = BP[res[m+1]][m]
+
+    for key,val in enumerate(res):
+        res[key] = tagset[val]
+    #print(res)
 
     # Look at the function compute_score for an example of how the tag sequence should be scored
-    return
+    return res
 
 def compute_score(tag_seq, input_length, score):
     """
@@ -150,6 +205,9 @@ def predict(inputs, input_len, parameters, feature_names, tagset):
     :return:
     """
     features = Features(inputs, feature_names)
+    ### in a linear model, local scoring function can be defined as a dot product of weights and features.
+    #print(features.inputs)
+    
     def score(cur_tag, pre_tag, i):
         return parameters.dot_product(features.compute_features(cur_tag, pre_tag, i))
 
@@ -229,7 +287,7 @@ def evaluate(data, parameters, feature_names, tagset):
     count = 0
     for inputs in data:
         count += 1
-        print(count)
+        #print(count)
         all_gold_tags.extend(inputs['gold_tags'][1:-1])  # deletes <START> and <STOP>
         input_len = len(inputs['tokens'])
         all_predicted_tags.extend(predict(inputs, input_len, parameters, feature_names, tagset)[1:-1]) # deletes <START> and <STOP>
@@ -305,7 +363,7 @@ class Features(object):
         :return: FeatureVector
         """
         ### self.inputs['tokens'][i] is the current word
-        #print("Current word %s",(self.inputs['tokens'][i]))
+        #print("Current word %s" % (self.inputs['tokens'][i]))
         feats = FeatureVector({})
         if 'tag' in self.feature_names:
             feats.times_plus_equal(1, FeatureVector({'t='+cur_tag: 1}))
