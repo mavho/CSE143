@@ -32,8 +32,6 @@ def decode(input_length, tagset, score):
     :return: Array strings of length input_length, which is the highest scoring tag sequence including <START> and <STOP>
     """
     ### insert start tag  
-    #tagset.insert(0, "<START>")
-    #tagset.append("<STOP>")
     tagset_len = len(tagset)
     SA = [[0]*input_length for i in range(tagset_len)]
     BP = [[0]*input_length for i in range(tagset_len)]
@@ -51,25 +49,32 @@ def decode(input_length, tagset, score):
     .
     ty
     """
+    max_score = -999
+    max_tag = 0
     ### Base case 
     for i in range(tagset_len):
         #print(score(tagset[i],'<START>',1))
-        SA[i][0] = score(tagset[i],"<START>", 1)
+        local_score = score(tagset[i],"<START>", 1)
+        if local_score > max_score:
+            max_score = local_score
+            max_tag = i
+        BP[i][0] = max_tag 
+        SA[i][0] = max_score 
 
 
     ### SA[i][tag] = max of (score(blah blah blah) + previous SA[i][tag-1])
     for i in range(1,input_length-1):
         ### go through the pairs of tags
-        for tag in range(len(tagset)):
+        for tag in range(tagset_len):
             max_score = -99999
             max_tag = ''
             #print("%d Current tag pair %s, %s" % (i,tagset[tag],tagset[tag-1]))
-            for pair in range(len(tagset)):
+            for pair in range(tagset_len):
                 local_score = SA[pair][i-1] + score(tagset[tag],tagset[pair],i)
                 if(local_score > max_score):
                     max_score = local_score
                     max_tag = pair
-                BP[tag][i] = max_tag
+            BP[tag][i] = max_tag
             SA[tag][i] = max_score
 
     ### last row of input
@@ -83,10 +88,16 @@ def decode(input_length, tagset, score):
             max_tag = i 
         BP[i][M] = max_tag
         SA[i][M] = max_score
+    """
+    for i in SA:
+        print(i)
+    for i in BP:
+        print(i)
+    """
 
     res = [0] * (M + 1)
     res[len(res)-1] = max_tag
-    for m in reversed(range(M-1)):
+    for m in reversed(range(M)):
         res[m] = BP[res[m+1]][m]
 
     for key,val in enumerate(res):
@@ -264,6 +275,7 @@ def write_predictions(out_filename, all_inputs, parameters, feature_names, tagse
     :param tagset:
     :return:
     """
+    count = 0
     with open(out_filename, 'w', encoding='utf-8') as f:
         for inputs in all_inputs:
             input_len = len(inputs['tokens'])
@@ -284,10 +296,7 @@ def evaluate(data, parameters, feature_names, tagset):
     """
     all_gold_tags = [ ]
     all_predicted_tags = [ ]
-    count = 0
     for inputs in data:
-        count += 1
-        #print(count)
         all_gold_tags.extend(inputs['gold_tags'][1:-1])  # deletes <START> and <STOP>
         input_len = len(inputs['tokens'])
         all_predicted_tags.extend(predict(inputs, input_len, parameters, feature_names, tagset)[1:-1]) # deletes <START> and <STOP>
