@@ -31,7 +31,6 @@ def decode(input_length, tagset, score):
         <START> and i=1 points to the first token. i=input_length-1 points to <STOP>
     :return: Array strings of length input_length, which is the highest scoring tag sequence including <START> and <STOP>
     """
-    ### insert start tag  
     tagset_len = len(tagset)
     SA = [[0]*input_length for i in range(tagset_len)]
     BP = [[0]*input_length for i in range(tagset_len)]
@@ -52,17 +51,12 @@ def decode(input_length, tagset, score):
     max_tag = 0
     ### Base case 
     for i in range(tagset_len):
-        ### this part i'm the least sure about, should 0 be 0 or 1. changing it to either doesn't really matter
-        local_score = score(tagset[i],"<START>", 1)
-        if local_score > max_score:
+        local_score = score(tagset[i],'<START>', 1)
+        if local_score >= max_score:
             max_score = local_score
             max_tag = i
-        SA[i][0] = max_score 
-        BP[i][0] = max_tag 
-
-    ### SA[i][tag] = max of (score(blah blah blah) + previous SA[i][tag-1])
-
-
+        SA[i][1] = max_score 
+        BP[i][1] = max_tag 
     """
     for first word token till last word token
         for each tag:
@@ -70,19 +64,21 @@ def decode(input_length, tagset, score):
             store SA[tag][pos] = max score
             store BP[tag][pos] = tag' that achieved this max store
     """
-    for i in range(1,input_length - 1):
+    for i in range(2,input_length-1):
         ### go through the pairs of tags
         for tag in range(tagset_len):
             max_score = -99999
-            max_tag = 0  
+            max_tag = -1
             #print("%d Current tag pair %s, %s" % (i,tagset[tag],tagset[tag-1]))
             for pair in range(tagset_len):
-                local_score = SA[pair][i-1] + score(tagset[tag],tagset[pair],i)
-                if(local_score > max_score):
+                #print(SA[pair][i-1],score(tagset[tag],tagset[pair],i))
+                local_score = score(tagset[tag],tagset[pair],i) + SA[pair][i-1]
+                if(local_score >= max_score):
                     max_score = local_score
                     max_tag = pair
+                    #print("This tag %s achieved this score %d" % (tagset[max_tag],max_score))
             BP[tag][i] = max_tag
-            SA[tag][i] = max_score
+            SA[tag][i] = max_score 
 
     ### last row of input
     M = input_length - 1 
@@ -95,25 +91,32 @@ def decode(input_length, tagset, score):
     """
     for i in range(tagset_len):
         end_score = score('<STOP>', tagset[i], M) + SA[i][M-1]
-        if end_score > max_score:
+        #print(end_score)
+        if end_score >= max_score:
             max_score = end_score
             max_tag = i 
+        #    print("This tag %s achieved this score %d" % (tagset[max_tag],max_score))
+
     res = [0] * (M + 1)
     res[len(res)-1] = max_tag
+#    print(res[len(res)-1], len(res))
     for m in reversed(range(1,M)):
+ #       print("pos " + str(BP[res[m+1]][m]))
         res[m] = BP[res[m+1]][m]
     """
     for i in SA:
         print(i)
+    print("#######################")
     for i in BP:
         print(i)
+    print("#######################")
     """
     for key,val in enumerate(res):
         res[key] = tagset[val]
-    res[0] = '<START>'
-    res[len(res)-1] = '<STOP>'
-
-    # Look at the function compute_score for an example of how the tag sequence should be scored
+    ### uneeded index
+    del res[1]
+    res[0] = "<START>"
+    res.append("<STOP>") 
     return res
 
 def compute_score(tag_seq, input_length, score):
@@ -311,6 +314,49 @@ def evaluate(data, parameters, feature_names, tagset):
         all_predicted_tags.extend(predict(inputs, input_len, parameters, feature_names, tagset)[1:-1]) # deletes <START> and <STOP>
     return conllevaluate(all_gold_tags, all_predicted_tags)
 
+def test_decoder():
+    # See https://classes.soe.ucsc.edu/cse143/Winter20/assignments/A3_Debug_Example.pdf
+    
+    tagset = ['NN', 'VB']     # make up our own tagset
+
+    def score_wrap(cur_tag, pre_tag, i):
+        retval = score(cur_tag, pre_tag, i)
+        print('Score('+cur_tag+','+pre_tag+','+str(i)+') returning '+str(retval))
+        return retval
+
+    def score(cur_tag, pre_tag, i):
+        if i == 0:
+            print("ERROR: Don't call score for i = 0 (that points to <START>, with nothing before it)")
+        if i == 1:
+            if pre_tag != '<START>':
+                print("ERROR: Previous tag should be <START> for i = 1. Previous tag = "+pre_tag)
+            if cur_tag == 'NN':
+                return 6
+            if cur_tag == 'VB':
+                return 4
+        if i == 2:
+            if cur_tag == 'NN' and pre_tag == 'NN':
+                return 4
+            if cur_tag == 'NN' and pre_tag == 'VB':
+                return 9
+            if cur_tag == 'VB' and pre_tag == 'NN':
+                return 5
+            if cur_tag == 'VB' and pre_tag == 'VB':
+                return 0
+        if i == 3:
+            if cur_tag != '<STOP>':
+                print('ERROR: Current tag at i = 3 should be <STOP>. Current tag = '+cur_tag)
+            if pre_tag == 'NN':
+                return 1
+            if pre_tag == 'VB':
+                return 1
+
+    predicted_tag_seq = decode(4, tagset, score_wrap)
+    print('Predicted tag sequence should be = <START> VB NN <STOP>')
+    print('Predicted tag sequence = '+' '.join(predicted_tag_seq))
+    print("Score of ['<START>','VB','NN','<STOP>'] = "+str(compute_score(['<START>','VB','NN','<STOP>'], 4, score)))
+    print('Max score should be = 14')
+    print('Max score = '+str(compute_score(predicted_tag_seq, 4, score)))
 
 def main_predict(data_filename, model_filename):
     """
@@ -416,7 +462,6 @@ class FeatureVector(object):
         """
         retval = 0
         for key, value in v2.fdict.items():
-            #print("%s : %d : %d" % (key,value, self.fdict.get(key,0)))
             retval += value * self.fdict.get(key, 0)
         return retval
 
@@ -444,6 +489,7 @@ class FeatureVector(object):
                 txt = line.split()
                 self.fdict[txt[0]] = float(txt[1])
 
+#test_decoder()
 main_predict('ner.dev', 'model.simple')  # Uncomment to predict on 'dev.ner' using the model 'model.simple' (need to implement 'decode' function)
 #main_train()    # Uncomment to train a model (need to implement 'sgd' function)
 
