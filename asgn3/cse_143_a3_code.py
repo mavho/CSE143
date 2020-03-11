@@ -159,7 +159,15 @@ def sgd(training_size, epochs, gradient, parameters, training_observer):
     # Look at the FeatureVector object.  You'll want to use the function times_plus_equal to update the
     # parameters.
     # To implement early stopping you can call the function training_observer at the end of each epoch.
-    return
+    permutation = list(range(1, training_size))
+    random.shuffle(permutation)
+    for epoch in range(0,epochs):
+        epoch+=1
+        random.shuffle(permutation)
+        for i in permutation:
+            parameters.times_plus_equal(-1,gradient(i))
+        training_observer(epoch, parameters)
+    return parameters
 
 
 def train(data, feature_names, tagset, epochs):
@@ -445,7 +453,7 @@ class FeatureVector(object):
                 self.fdict[txt[0]] = float(txt[1])
 
 main_predict('ner.dev', 'model.simple')  # Uncomment to predict on 'dev.ner' using the model 'model.simple' (need to implement 'decode' function)
-#main_train()    # Uncomment to train a model (need to implement 'sgd' function)
+main_train()    # Uncomment to train a model (need to implement 'sgd' function)
 
 """To sort the model weights for easy viewing, you can use Unix commands:"""
 
