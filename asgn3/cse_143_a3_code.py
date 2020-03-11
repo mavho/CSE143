@@ -63,7 +63,7 @@ def decode(input_length, tagset, score):
 
 
     ### SA[i][tag] = max of (score(blah blah blah) + previous SA[i][tag-1])
-    for i in range(1,input_length-1):
+    for i in range(1,input_length):
         ### go through the pairs of tags
         for tag in range(tagset_len):
             max_score = -99999
@@ -86,15 +86,8 @@ def decode(input_length, tagset, score):
         if end_score > max_score:
             max_score = end_score
             max_tag = i 
-        BP[i][M] = max_tag
-        SA[i][M] = max_score
-    """
-    for i in SA:
-        print(i)
-    for i in BP:
-        print(i)
-    """
-
+        BP[tagset_len-1][M] = max_tag
+        SA[tagset_len-1][M] = max_score
     res = [0] * (M + 1)
     res[len(res)-1] = max_tag
     for m in reversed(range(M)):
@@ -102,10 +95,9 @@ def decode(input_length, tagset, score):
 
     for key,val in enumerate(res):
         res[key] = tagset[val]
-    #print(res)
 
     # Look at the function compute_score for an example of how the tag sequence should be scored
-    return res
+    return 
 
 def compute_score(tag_seq, input_length, score):
     """
