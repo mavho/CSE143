@@ -40,7 +40,6 @@ def decode(input_length, tagset, score):
     SA stores the scores
     each column represents a token in the input
     each row represents a tag
-
         x0 x1 x2 x3 x4.... xn
     t0
     t1
@@ -53,21 +52,29 @@ def decode(input_length, tagset, score):
     max_tag = 0
     ### Base case 
     for i in range(tagset_len):
-        #print(score(tagset[i],'<START>',1))
+        ### this part i'm the least sure about, should 0 be 0 or 1. changing it to either doesn't really matter
         local_score = score(tagset[i],"<START>", 1)
         if local_score > max_score:
             max_score = local_score
             max_tag = i
-        BP[i][0] = max_tag 
         SA[i][0] = max_score 
-
+        BP[i][0] = max_tag 
 
     ### SA[i][tag] = max of (score(blah blah blah) + previous SA[i][tag-1])
-    for i in range(1,input_length):
+
+
+    """
+    for first word token till last word token
+        for each tag:
+            find the max of all score(tag,tag', token pos) + previous word's tag' score
+            store SA[tag][pos] = max score
+            store BP[tag][pos] = tag' that achieved this max store
+    """
+    for i in range(1,input_length - 1):
         ### go through the pairs of tags
         for tag in range(tagset_len):
             max_score = -99999
-            max_tag = ''
+            max_tag = 0  
             #print("%d Current tag pair %s, %s" % (i,tagset[tag],tagset[tag-1]))
             for pair in range(tagset_len):
                 local_score = SA[pair][i-1] + score(tagset[tag],tagset[pair],i)
@@ -81,23 +88,33 @@ def decode(input_length, tagset, score):
     M = input_length - 1 
     max_score = -999 
     max_tag = -1 
+    """
+    The last token <STOP> is handled a little differently, but still really the same
+    Goal of this is to obtain the best tag' that achieved the max
+    we'll store that tag in max_tag
+    """
     for i in range(tagset_len):
-        end_score = score('<STOP>', tagset[i], input_length - 1) + SA[i][M-1]
+        end_score = score('<STOP>', tagset[i], M) + SA[i][M-1]
         if end_score > max_score:
             max_score = end_score
             max_tag = i 
-        BP[tagset_len-1][M] = max_tag
-        SA[tagset_len-1][M] = max_score
     res = [0] * (M + 1)
     res[len(res)-1] = max_tag
-    for m in reversed(range(M)):
+    for m in reversed(range(1,M)):
         res[m] = BP[res[m+1]][m]
-
+    """
+    for i in SA:
+        print(i)
+    for i in BP:
+        print(i)
+    """
     for key,val in enumerate(res):
         res[key] = tagset[val]
+    res[0] = '<START>'
+    res[len(res)-1] = '<STOP>'
 
     # Look at the function compute_score for an example of how the tag sequence should be scored
-    return 
+    return res
 
 def compute_score(tag_seq, input_length, score):
     """
@@ -209,7 +226,7 @@ def predict(inputs, input_len, parameters, feature_names, tagset):
     """
     features = Features(inputs, feature_names)
     ### in a linear model, local scoring function can be defined as a dot product of weights and features.
-    #print(features.inputs)
+    #print(features.inputs['gold_tags'])
     
     def score(cur_tag, pre_tag, i):
         return parameters.dot_product(features.compute_features(cur_tag, pre_tag, i))
@@ -399,6 +416,7 @@ class FeatureVector(object):
         """
         retval = 0
         for key, value in v2.fdict.items():
+            #print("%s : %d : %d" % (key,value, self.fdict.get(key,0)))
             retval += value * self.fdict.get(key, 0)
         return retval
 
