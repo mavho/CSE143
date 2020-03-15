@@ -398,7 +398,7 @@ def main_train():
     feature_names = ['tag', 'prev_tag', 'current_word']
 
     print('Training...')
-    parameters = train(train_data, feature_names, tagset, epochs=100)
+    parameters = train(train_data, feature_names, tagset, epochs=10)
     print('Training done')
     dev_data = read_data('ner.dev')
     evaluate(dev_data, parameters, feature_names, tagset)
