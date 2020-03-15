@@ -398,7 +398,7 @@ def main_train():
     feature_names = ['tag', 'prev_tag', 'current_word']
 
     print('Training...')
-    parameters = train(train_data, feature_names, tagset, epochs=10)
+    parameters = train(train_data, feature_names, tagset, epochs=100)
     print('Training done')
     dev_data = read_data('ner.dev')
     evaluate(dev_data, parameters, feature_names, tagset)
@@ -496,9 +496,10 @@ class FeatureVector(object):
                 self.fdict[txt[0]] = float(txt[1])
 
 #test_decoder()
-#main_predict('ner.dev', 'model.simple')  # Uncomment to predict on 'dev.ner' using the model 'model.simple' (need to implement 'decode' function)
-print('hello')
-main_train()    # Uncomment to train a model (need to implement 'sgd' function)
+main_predict('ner.dev', 'model.iter29')
+main_predict('ner.test', 'model.iter29')  # Uncomment to predict on 'dev.ner' using the model 'model.simple' (need to implement 'decode' function)
+#print('hello')
+#main_train()    # Uncomment to train a model (need to implement 'sgd' function)
 
 """To sort the model weights for easy viewing, you can use Unix commands:"""
 
