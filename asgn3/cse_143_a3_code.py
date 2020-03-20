@@ -398,7 +398,7 @@ def main_train():
     feature_names = ['tag', 'prev_tag', 'current_word']
 
     print('Training...')
-    parameters = train(train_data, feature_names, tagset, epochs=10)
+    parameters = train(train_data, feature_names, tagset, epochs=20)
     print('Training done')
     dev_data = read_data('ner.dev')
     evaluate(dev_data, parameters, feature_names, tagset)
@@ -498,9 +498,3 @@ class FeatureVector(object):
 #test_decoder()
 main_predict('ner.test', 'model.simple')  # Uncomment to predict on 'dev.ner' using the model 'model.simple' (need to implement 'decode' function)
 #main_train()    # Uncomment to train a model (need to implement 'sgd' function)
-
-"""To sort the model weights for easy viewing, you can use Unix commands:"""
-
-#!cat "/content/gdrive/My Drive/CSE-143-A3/model" | awk '{print $2, $1}' | sort -gr > "/content/gdrive/My Drive/CSE-143-A3/model.sorted.txt"
-
-"""The file `model.sorted.txt` will be viewable in your Google Drive folder."""

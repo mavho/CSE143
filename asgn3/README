@@ -1,0 +1,3 @@
+To predict different files, edit line 499.
+Comment line 499, and uncomment line 500 to only train the model
+main_train() will attempt to create a new model named model.
