@@ -496,9 +496,8 @@ class FeatureVector(object):
                 self.fdict[txt[0]] = float(txt[1])
 
 #test_decoder()
-#main_predict('ner.dev', 'model.simple')  # Uncomment to predict on 'dev.ner' using the model 'model.simple' (need to implement 'decode' function)
-print('hello')
-main_train()    # Uncomment to train a model (need to implement 'sgd' function)
+main_predict('ner.test', 'model.simple')  # Uncomment to predict on 'dev.ner' using the model 'model.simple' (need to implement 'decode' function)
+#main_train()    # Uncomment to train a model (need to implement 'sgd' function)
 
 """To sort the model weights for easy viewing, you can use Unix commands:"""
 
